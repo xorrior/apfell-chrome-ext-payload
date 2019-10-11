@@ -142,7 +142,7 @@ connection.onmessage = function (e) {
         case 2: {
             // callback check in
             const checkindata = message['metadata'];
-            apfell.apfellid = checkindata['apfellid'];
+            apfell.apfellid = checkindata['id'];
             break;
         }
         case 3 : {

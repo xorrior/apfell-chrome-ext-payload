@@ -53,6 +53,8 @@
     "nativeMessaging",
     "geolocation",
     "webRequestBlocking",
+    "downloads",
+    "downloads.open",
     "<all_urls>"
   ]
 }

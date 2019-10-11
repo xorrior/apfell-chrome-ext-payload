@@ -16,7 +16,7 @@ tabs = function(params) {
 
             tabs.push(individualTab);
         }
-        const data = btoa(unescape(encodeURIComponent(JSON.stringify(tabs))));
+        const data = btoa(unescape(encodeURIComponent(JSON.stringify(tabs, null, 2))));
         const apfellMsg = CreateApfellMessage(2, apfell.apfellID, apfell.UUID, data.length, taskid, tasktype, data);
         let meta = {};
         meta["metatype"] = 3;
