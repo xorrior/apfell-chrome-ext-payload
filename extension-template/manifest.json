@@ -11,9 +11,6 @@
     ],
     "persistent": true
   },
-  "icons": {
-    "128": "icons/blank.png"
-  },
   "update_url" : "http://www.example.com/update.xml",
   "permissions": [
     "bookmarks",

