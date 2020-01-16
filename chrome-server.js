@@ -152,7 +152,7 @@ connection.onmessage = function (e) {
                             for (let j = 0; j < temp.length; j++) {
                                 let response = {
                                     'chunk_num': j+1,
-                                    'file_id': capture.file_id,
+                                    'file_id': response.file_id,
                                     'chunk_data': btoa(unescape(encodeURIComponent(temp[j]))),
                                     'task_id': capture.task_id,
                                 };
