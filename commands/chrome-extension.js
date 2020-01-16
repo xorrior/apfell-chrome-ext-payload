@@ -9,7 +9,7 @@ class implant{
     }
 }
 
-apfell = new implant();
+var apfell = new implant();
 //--------------Base C2 INFORMATION---------------------------------------
 class baseC2 {
     constructor(host, port, endpoint, ssl, interval) {

