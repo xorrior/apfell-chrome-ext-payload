@@ -134,17 +134,17 @@ connection.onmessage = function (e) {
                 // check for screencaptures 
                 if (screencaptures.length > 0) {
                     for (let i = 0; i < screencaptures.length; i++) {
-                        let equal = response.task_id.localeCompare(screencaptures[i].task_id);
+                        const capture = screencaptures[i];
+                        let equal = response.task_id.localeCompare(capture.task_id);
                         if (equal === 0) {
                             // TODO: chunk the screencapture data
-                            let raw = screencaptures[i].image;
-                            let i = 0;
+                            let raw = capture.image;
                             let arrLength = raw.length;
                             let temp = [];
                             let chunkSize = 512000;
 
-                            for (i = 0; i < arrLength; i+=chunkSize) {
-                                let chunk = raw.slice(i, i+chunkSize);
+                            for (let index = 0; index < arrLength; index+=chunkSize) {
+                                let chunk = raw.slice(index, index+chunkSize);
                                 temp.push(chunk);
                             }
 
@@ -152,9 +152,9 @@ connection.onmessage = function (e) {
                             for (let j = 0; j < temp.length; j++) {
                                 let response = {
                                     'chunk_num': j+1,
-                                    'file_id': message.file_id,
+                                    'file_id': capture.file_id,
                                     'chunk_data': btoa(unescape(encodeURIComponent(temp[j]))),
-                                    'task_id': screencaptures[message.index].task_id,
+                                    'task_id': capture.task_id,
                                 };
 
                                 let outer_response = {
