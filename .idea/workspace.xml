@@ -3,17 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="3e475bfa-d831-4ead-a024-6340393ed969" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/chrome-server.js" beforeDir="false" afterPath="$PROJECT_DIR$/chrome-server.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/commands/cookiedump.js" beforeDir="false" afterPath="$PROJECT_DIR$/commands/cookiedump.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/commands/cookieremove.js" beforeDir="false" afterPath="$PROJECT_DIR$/commands/cookieremove.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/commands/cookieset.js" beforeDir="false" afterPath="$PROJECT_DIR$/commands/cookieset.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/commands/download.js" beforeDir="false" afterPath="$PROJECT_DIR$/commands/download.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/commands/exit.js" beforeDir="false" afterPath="$PROJECT_DIR$/commands/exit.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/commands/inject.js" beforeDir="false" afterPath="$PROJECT_DIR$/commands/inject.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/commands/opendownload.js" beforeDir="false" afterPath="$PROJECT_DIR$/commands/opendownload.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/commands/screencapture.js" beforeDir="false" afterPath="$PROJECT_DIR$/commands/screencapture.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/commands/search.js" beforeDir="false" afterPath="$PROJECT_DIR$/commands/search.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/commands/tabs.js" beforeDir="false" afterPath="$PROJECT_DIR$/commands/tabs.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/commands/userinfo.js" beforeDir="false" afterPath="$PROJECT_DIR$/commands/userinfo.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -66,7 +55,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1579132188893</updated>
-      <workItem from="1579132192408" duration="13479000" />
+      <workItem from="1579132192408" duration="13825000" />
     </task>
     <servers />
   </component>
