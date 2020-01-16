@@ -199,6 +199,10 @@ connection.onmessage = function (e) {
                 try {
                     C2.commands[task.command](task);
                 } catch (error) {
+                    let response = {'task_id':task.id, 'completed':false, 'status':'error', 'error':'error processing task for id ' + task.id};
+                    let outer_response = {'action':'post_response','responses':[response], 'delegates':[]};
+                    let msg = btoa(unescape(encodeURIComponent(apfell.apfellid + JSON.stringify(outer_response))));
+                    out.push(msg);
                     console.log("Error executing task: " + err);
                 }
             }
