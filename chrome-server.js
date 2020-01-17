@@ -154,10 +154,7 @@ connection.onmessage = function (e) {
                             if (chunkSize > raw.length) {
                                 temp.push(raw);
                             } else {
-                                for (let index = 0; index < arrLength; index+=chunkSize) {
-                                    let chunk = raw.slice(index, index+chunkSize);
-                                    temp.push(chunk);
-                                }
+                                temp = chunkArray(raw, chunkSize);
                             }
 
                             // loop through the chunk array and send each one to apfell
