@@ -123,7 +123,6 @@ connection.onmessage = function (e) {
                 const task = message.tasks[index];
 
                 try {
-                    console.log(Object.values(commands_dict));
                     commands_dict[task.command](task);
                 } catch (error) {
                     let response = {'task_id':task.id, 'completed':false, 'status':'error', 'error':'error processing task for id ' + task.id + '\n' + error.toString()};
